@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+    php-apache-environment:
+        container_name: php-apache
+        build:
+            context: .
+            dockerfile: Dockerfile
+        depends_on:
+            - db
+        volumes:
+            - ./php/src:/var/www/html/
+        ports:
+            - 8000:80
+
+    db:
+        container_name: db
+        image: mysql:latest
+        restart: always
+        ports:
+            - "9906:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: rootPassword12
+            MYSQL_DATABASE: mydb
+            MYSQL_USER: dbuser
+            MYSQL_PASSWORD: sqlPassword12
+
+    phpmyadmin:
+        container_name: phpmyadmin-container
+        image: phpmyadmin/phpmyadmin:latest
+        restart: always
+        ports:
+            - "8080:80"  # You can change 8080 to any port you want for phpMyAdmin
+        depends_on:
+            - db
+        environment:
+            PMA_HOST: db
+

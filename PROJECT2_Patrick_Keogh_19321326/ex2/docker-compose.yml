@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
+  demonstrator_dm:
+    build:
+      context: .
+      dockerfile: demonstrator_dm/Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    command: python /usr/src/app/demonstrator_dm.py
+    volumes:
+      - ./dm_logs:/usr/src/app/dm_logs
+
+  demonstrator_cc:
+    build:
+      context: .
+      dockerfile: demonstrator_cc/Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    command: python /usr/src/app/demonstrator_cc.py
+
+  teaching_assistant:
+    build:
+      context: .
+      dockerfile: teaching_assistant/Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    command: python /usr/src/app/teaching_assistant.py
+
+  module_coordinator:
+    build:
+      context: .
+      dockerfile: module_coordinator/Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    command: python /usr/src/app/module_coordinator.py
+
+  student:
+    build:
+      context: .
+      dockerfile: student/Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    command: python /usr/src/app/student.py
